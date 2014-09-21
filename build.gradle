@@ -1,0 +1,33 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+group = 'com.example.template'
+version = '1.0-SNAPSHOT'
+
+defaultTasks 'build'
+
+repositories {
+    mavenCentral()
+}
+
+ext.jettyVersion = "9.2.3.v20140905"
+ext.slf4jVersion = "1.7.7"
+
+dependencies {
+    compile "org.eclipse.jetty:jetty-server:$jettyVersion"
+    compile 'org.picocontainer:picocontainer:2.14.3'
+
+    // json
+    compile "org.json:json:20140107"
+    compile 'com.google.code.gson:gson:2.3'
+
+    // logging
+    compile 'ch.qos.logback:logback-classic:1.1.2'
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+}
+
+
+
+

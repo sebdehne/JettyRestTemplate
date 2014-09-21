@@ -1,4 +1,13 @@
 build/
 .gradle/
 
+# IntelliJ
 *.ipr
+*.iws
+
+# eclipse
+bin/
+.project
+.classpath
+.settings/
+

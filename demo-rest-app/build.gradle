@@ -1,0 +1,37 @@
+dependencies {
+    // needed for the main app:
+    compile project(":simple-jetty-server")
+    compile 'ch.qos.logback:logback-classic:1.1.2'
+
+    // needed for testing:
+    testCompile "junit:junit:4.11"
+    testCompile "org.apache.httpcomponents:fluent-hc:4.3.5"
+    testCompile 'com.jayway.jsonpath:json-path:0.9.1'
+}
+
+test {
+    useJUnit {
+        includeCategories 'com.example.template.demo.category.UnitTest'
+    }
+}
+
+task itTests(type: Test) {
+    useJUnit {
+        includeCategories 'com.example.template.demo.category.IntegrationTest'
+    }
+}
+
+/*
+ * Pack all dependencies into our jar and set the Main class.
+ * This allows us to run the entire app using:
+ *
+ * java -jar demo-rest-app.jar
+ */
+jar {
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest.attributes("Main-Class": "com.dehnes.rest.demo.Main")
+}

@@ -1,0 +1,11 @@
+dependencies {
+    compile "org.eclipse.jetty:jetty-server:$jettyVersion"
+    compile 'org.picocontainer:picocontainer:2.14.3'
+
+    // json
+    compile "org.json:json:20140107"
+    compile 'com.google.code.gson:gson:2.3'
+
+    // logging
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+}

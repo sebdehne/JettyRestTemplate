@@ -1,9 +1,11 @@
-package com.example.template;
+package com.dehnes.rest.server;
 
 import java.io.IOException;
 
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.server.Response;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,14 +14,20 @@ public class RestResponseUtils {
 
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public static void jsonResponse(Response r, int statusCode, Object body) {
+    public static void setJsonResponse(Response r, Object body) {
+        setJsonResponse(r, 200, body);
+    }
+
+    public static void setJsonResponse(Response r, int statusCode, Object body) {
         try {
             r.reset();
             r.setStatus(statusCode);
             r.setContentType(MimeTypes.Type.APPLICATION_JSON.asString());
             String bodyStr;
             if (body instanceof String) {
-                bodyStr = gson.toJson(new JsonStringResponse((String) body));
+                bodyStr = new JSONObject().put("response", body.toString()).toString();
+            } else if (body instanceof JSONObject || body instanceof JSONArray) {
+                bodyStr = body.toString();
             } else {
                 bodyStr = gson.toJson(body);
             }
@@ -31,15 +39,7 @@ public class RestResponseUtils {
     }
 
     public static void internalServer(Response r, Throwable t) {
-        jsonResponse(r, 500, t.getMessage());
-    }
-
-    public static class JsonStringResponse {
-        private final String response;
-
-        public JsonStringResponse(String response) {
-            this.response = response;
-        }
+        setJsonResponse(r, 500, t.getMessage());
     }
 
 }

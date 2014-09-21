@@ -1,4 +1,4 @@
-package com.example.template;
+package com.dehnes.rest.server;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,23 +15,18 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.example.template.config.MutableConfig;
-import com.example.template.config.Route;
-import com.example.template.config.Routes;
+import com.dehnes.rest.server.config.Route;
+import com.dehnes.rest.server.config.RoutesFactory;
 
-public class Main {
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+public class EmbeddedJetty {
+    private static final Logger logger = LoggerFactory.getLogger(EmbeddedJetty.class);
 
-    public static void main(String[] args) throws Exception {
-
-        // instantiate all beans
-        MutableConfig config = new MutableConfig();
-
+    public Server start(int port, RoutesFactory routesFactory) throws Exception {
         // gets the routes
-        List<Route> routes = config.getInstance(Routes.class).getRoutes();
+        List<Route> routes = routesFactory.getRoutes();
 
         // setup the server
-        Server server = new Server(Integer.parseInt(System.getProperty("JETTY_PORT", "8080")));
+        Server server = new Server(port);
         server.setHandler(new AbstractHandler() {
             @Override
             public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -40,10 +35,10 @@ public class Main {
                     routes.stream()
                             .filter(r -> !response.isCommitted())
                             .filter(r -> r.test(httpMethod, target))
-                            .forEach(r -> r.getHandler().accept((Request) request, (Response) response));
+                            .forEach(r -> r.execute((Request) request, (Response) response));
 
                     if (!response.isCommitted()) {
-                        RestResponseUtils.jsonResponse((Response) response, 404, "No handler found for " + httpMethod + " " + target);
+                        RestResponseUtils.setJsonResponse((Response) response, 404, "No handler found for " + httpMethod + " " + target);
                     }
                 } catch (Exception e) {
                     RestResponseUtils.internalServer((Response) response, e);
@@ -53,8 +48,19 @@ public class Main {
         });
 
         // start it
-        server.start();
-        server.join();
+        try {
+            server.start();
+        } catch (Exception e) {
+            logger.error("", e);
+            try {
+                server.stop();
+            } catch (Exception e1) {
+                logger.error("", e1);
+            }
+            server.destroy();
+            throw new RuntimeException("Could not start server", e);
+        }
+        return server;
     }
 
 }

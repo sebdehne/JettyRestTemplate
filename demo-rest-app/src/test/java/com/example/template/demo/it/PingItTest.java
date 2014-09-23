@@ -27,8 +27,9 @@ public class PingItTest {
 
     @Test
     public void testNotFound() throws IOException {
-        restClient.executeGet("/not_there", null, (code, response) -> {
+        restClient.executeGet("/not_there", "$.response", (code, response) -> {
             Assert.assertEquals(404, code.intValue());
+            Assert.assertTrue(response.startsWith("No handler found for "));
         });
     }
 }
